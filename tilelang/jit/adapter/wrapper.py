@@ -6,6 +6,7 @@ from tvm import IRModule
 from tvm.target import Target
 
 from .utils import (
+    is_sunmmio_target,
     is_metal_target,
     is_cutedsl_target,
     match_declare_kernel,
@@ -961,6 +962,10 @@ class TLPyWrapper(TLWrapper):
             from tilelang.jit.adapter.nvrtc import TLNVRTCSourceWrapper
 
             wrapper_class = TLNVRTCSourceWrapper
+        # elif is_sunmmio_target(self.target):
+        #     from tilelang.jit.adapter.sunmmio import TLSunmmioSourceWrapper
+
+        #     wrapper_class = TLSunmmioSourceWrapper
         else:
             raise ValueError(f"Unsupported target for NVRTC backend: {self.target}")
         wrapper = wrapper_class(

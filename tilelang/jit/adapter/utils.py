@@ -114,6 +114,8 @@ def is_metal_target(target: Target) -> bool:
 def is_cutedsl_target(target: Target) -> bool:
     return target.kind.name == "cuda" and "cutedsl" in target.keys
 
+def is_sunmmio_target(target: Target) -> bool:
+    return target.kind.name == "llvm" and "mcpu" in target.attrs and "sunmmio-" in target.attrs["mcpu"]
 
 def get_annotated_mod(
     func_or_mod: tir.PrimFunc | tvm.IRModule,

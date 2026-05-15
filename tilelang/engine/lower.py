@@ -21,6 +21,7 @@ from tilelang.engine.phase import (
     LowerAndLegalize,
     OptimizeForTarget,
 )
+from tilelang.utils.target import target_is_sunmmio
 
 
 def is_cpu_device_backend(target: Target):
@@ -198,7 +199,10 @@ def device_codegen_without_compile(device_mod: tvm.IRModule, target: Target) -> 
     elif target.kind.name == "c":
         device_mod = tvm.ffi.get_global_func("target.build.tilelang_cpp")(device_mod, target)
     elif target.kind.name == "llvm":
-        device_mod = tvm.ffi.get_global_func("target.build.llvm")(device_mod, target)
+        if target_is_sunmmio(target):
+            device_mod = tvm.ffi.get_global_func("target.build.tilelang_sunmmio_without_compile")(device_mod, target)
+        else:
+            device_mod = tvm.ffi.get_global_func("target.build.llvm")(device_mod, target)
     elif target.kind.name == "webgpu":
         device_mod = tvm.ffi.get_global_func("target.build.webgpu")(device_mod, target)
     elif target.kind.name == "metal":
@@ -254,11 +258,14 @@ def lower(
     host_mod = tir.transform.Filter(_is_host_call)(mod)
     device_mod = tir.transform.Filter(_is_device_call)(mod)
 
-    codegen_mod = device_codegen(device_mod, target) if enable_device_compile else device_codegen_without_compile(device_mod, target)
+    # TEMP
+    #codegen_mod = device_codegen(device_mod, target) if enable_device_compile else device_codegen_without_compile(device_mod, target)
+    cuda_c_src = 'cuda_c_src'
 
     if enable_host_codegen:
         host_mod = host_codegen(host_mod, target_host)
         host_mod.import_module(codegen_mod)
         return CompiledArtifact(host_mod, device_mod, params, codegen_mod.inspect_source(), rt_mod=host_mod)
 
-    return CompiledArtifact(host_mod, device_mod, params, codegen_mod.inspect_source())
+    #return CompiledArtifact(host_mod, device_mod, params, codegen_mod.inspect_source())
+    return CompiledArtifact(host_mod, device_mod, params, cuda_c_src)

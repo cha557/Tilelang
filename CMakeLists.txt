@@ -269,6 +269,8 @@ file(GLOB TILE_LANG_SRCS
   src/target/sunmmio/*.cc
   src/target/utils.cc
   src/target/sunmmio_utils.cc
+  src/target/codegen_sunmmio.cc
+  src/target/rt_mod_sunmmio.cc
   src/target/codegen_c_host.cc
   src/target/codegen_cpp.cc
   src/target/rt_mod_cpp.cc

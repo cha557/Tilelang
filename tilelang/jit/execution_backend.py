@@ -3,7 +3,7 @@ from __future__ import annotations
 from collections.abc import Iterable
 
 from tvm.target import Target
-from tilelang.jit.adapter.utils import is_cutedsl_target
+from tilelang.jit.adapter.utils import is_cutedsl_target, is_sunmmio_target
 
 # Canonical names for execution backends used internally
 _CANONICAL_MAP = {
@@ -41,6 +41,8 @@ def allowed_backends_for_target(target: Target, *, include_unavailable: bool = T
         allowed = ["tvm_ffi", "torch"]
     elif kind == "c":  # CPU C backend
         allowed = ["cython", "tvm_ffi"]
+    elif is_sunmmio_target(target):
+        allowed = ["sunmmio"]
     else:
         # Fallback: prefer portable hosts
         allowed = ["cython", "tvm_ffi"]
@@ -82,6 +84,8 @@ def resolve_execution_backend(requested: str | None, target: Target) -> str:
         kind = _target_kind(target)
         if kind == "cuda" or kind == "metal":
             choice = "tvm_ffi"
+        elif is_sunmmio_target(target):
+            choice = "sunmmio"
         else:
             choice = "cython"
         # If the chosen default is not available (very rare), fall back to first available
